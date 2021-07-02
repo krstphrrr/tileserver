@@ -1,11 +1,18 @@
-const express = require('express')
-const app = express()
-const port = 3000
 
-app.get('/', (req, res) => {
-  res.send('ready for the fun stuff')
-})
+const API = require("./test")
 
-app.listen(port, () => {
-  console.log(`listening at http://localhost:${port}`)
-})
+const PORT = Number( process.env.PORT || 3000 );
+
+const main = ( ) => {
+  const app = API.server()
+  return app
+}
+
+if ( require.main === module ) {
+  main( ).listen( PORT );
+  if ( process.pid ) {
+    console.log( `This process is your pid: ${process.pid}` );
+  }
+} else {
+  module.exports = main( );
+}
