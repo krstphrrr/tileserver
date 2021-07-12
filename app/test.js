@@ -18,14 +18,18 @@ const API = { };
 API.server = ( ) => {
   const app = express()
   // building tiling routes here
-  app.get('/:layer/:z/:x/:y', (req, res) => {
-    res.send('ready for the fun stuff')
+  app.get('/:style/:zoom/:x/:y.:format([a-z.]+)', (req, res) => {
+    
     p = req.params;
-    fetchTile(p.layer, parseInt(p.z), parseInt(p.x), parseInt(p.y.replace('.png', '')), function(img) {
-      // res.send(img);
-    });
+    res.send(p)
+    // console.log(req)
+    fetchTile(req)
+    // fetchTile(p.style, parseInt(p.z), parseInt(p.x), parseInt(p.y.replace('.png', '')), function(img) {
+    //   // res.send(img);
+    // });
 
   })
+
 
 
 

@@ -1,4 +1,4 @@
-const pg = require( "pg" );
+const pg = require( "pg" ).native
 const moment = require( "moment-timezone" );
 const config = require( "../config" );
 
@@ -15,24 +15,25 @@ types.setTypeParser( timestampOID, stringValue => (
 pgClient.connect = async cfg => {
   
   if(pgClient.connection){return pgClient.connection}
-    const thisConfig = Object.assign({}, config, cfg)
+  const thisConfig = Object.assign({}, config, cfg)
 
-    const pgConfig = {
-      user:thisConfig.database.user,
-      password: thisConfig.database.password,
-      host: thisConfig.database.host,
-      port: thisConfig.database.port,
-      database: thisConfig.database.dbname,
-      idle_in_transaction_session_timeout: 0
-    }
-    const client = new pg.Client( pgConfig )
+  const pgConfig = {
+    user:thisConfig.database.user,
+    password: thisConfig.database.password,
+    host: thisConfig.database.host,
+    port: thisConfig.database.port,
+    database: thisConfig.database.dbname,
+    idle_in_transaction_session_timeout: 0
+  }
+  let client = new pg.Client( pgConfig )
 
-    client.on('error', e => {
-      console.error('Database error', e);
-      client = null;
-    });
-    await client.connect()
-    pgClient.connection = client;
+  client.on('error', e => {
+    console.error('Database error 1', e);
+    client = pgClient.connection
+  });
+
+  await client.connect()
+  pgClient.connection = client;
     // client.connect(err=>{
     //   if(err){
     //     console.error('connection error', err.stack)
@@ -40,10 +41,10 @@ pgClient.connect = async cfg => {
     //     console.log('connected')
     //   }
     // })
-    if ( !pgClient.connection ) {
-      throw new Error( "Couldn't connect to database" );
-    }
-    return pgClient.connection
+  if ( !pgClient.connection ) {
+    throw new Error( "Couldn't connect to database" );
+  }
+  return pgClient.connection
 }
 
 pgClient.connect( )
