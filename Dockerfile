@@ -14,6 +14,7 @@ COPY ./ /usr/src
 # install dependencies 
 WORKDIR /usr/src
 RUN npm install
+RUN npm i mapnik
 # run app
 
 CMD ["npm", "start"]

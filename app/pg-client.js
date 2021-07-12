@@ -22,16 +22,27 @@ pgClient.connect = async cfg => {
       password: thisConfig.database.password,
       host: thisConfig.database.host,
       port: thisConfig.database.port,
-      database: thisConfig.database.dbname
+      database: thisConfig.database.dbname,
+      idle_in_transaction_session_timeout: 0
     }
     const client = new pg.Client( pgConfig )
-    client.connect(err=>{
-      if(err){
-        console.error('connection error', err.stack)
-      } else {
-        console.log('connected')
-      }
-    })
+
+    client.on('error', e => {
+      console.error('Database error', e);
+      client = null;
+    });
+    await client.connect()
+    pgClient.connection = client;
+    // client.connect(err=>{
+    //   if(err){
+    //     console.error('connection error', err.stack)
+    //   } else {
+    //     console.log('connected')
+    //   }
+    // })
+    if ( !pgClient.connection ) {
+      throw new Error( "Couldn't connect to database" );
+    }
     return pgClient.connection
 }
 
