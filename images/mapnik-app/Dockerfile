@@ -15,6 +15,7 @@ COPY ./ /usr/src
 WORKDIR /usr/src
 RUN npm install
 RUN npm i mapnik
+RUN npm i @mapbox/geojson-mapnikify
 # run app
 
 CMD ["npm", "start"]

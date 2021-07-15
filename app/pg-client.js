@@ -1,4 +1,4 @@
-const pg = require( "pg" ).native
+const pg = require( "pg" )
 const moment = require( "moment-timezone" );
 const config = require( "../config" );
 

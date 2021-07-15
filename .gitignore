@@ -3659,3 +3659,12 @@ node_modules/xdg-basedir/index.js
 node_modules/xdg-basedir/license
 node_modules/xdg-basedir/package.json
 node_modules/xdg-basedir/readme.md
+node_modules/.bin/geojson-mapnikify
+node_modules/.bin/geojson-mapnikify.cmd
+node_modules/.bin/geojson-mapnikify.ps1
+node_modules/.bin/geojson-normalize
+node_modules/.bin/geojson-normalize.cmd
+node_modules/.bin/geojson-normalize.ps1
+node_modules/.bin/needle
+node_modules/.bin/needle.cmd
+node_modules/.bin/needle.ps1

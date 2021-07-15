@@ -34,12 +34,12 @@ API.server = ( ) => {
 
 
 
-  pgClient.connect( ).then( ( ) => {
-    console.log("HM")
-    // 
-  } ).catch( e => {
-    console.log( e );
-  } );
+  // pgClient.connect( ).then( ( ) => {
+  //   console.log("HM")
+  //   // 
+  // } ).catch( e => {
+  //   console.log( e );
+  // } );
 
   return app;
 };
