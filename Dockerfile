@@ -7,15 +7,18 @@ RUN apt-get update && \
     curl -sL https://deb.nodesource.com/setup_16.x | bash && \
     apt-get install nodejs
 
-# get app directory 
-RUN mkdir /usr/src/app
-COPY ./ /usr/src
-
 # install dependencies 
 WORKDIR /usr/src
+RUN mkdir /usr/src/app
+COPY ./ /usr/src
 RUN npm install
 RUN npm i mapnik
 RUN npm i @mapbox/geojson-mapnikify
+
+
+# get app directory 
+
+
 # run app
 
 CMD ["npm", "start"]

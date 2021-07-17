@@ -1,6 +1,6 @@
 var fs = require("fs");
-var mapnik = require("mapnik");
-let mapnikify = require('@mapbox/geojson-mapnikify')
+// var mapnik = require("mapnik");
+// let mapnikify = require('@mapbox/geojson-mapnikify')
 // var mkdirp = require('mkdirp');
 const _ = require( "lodash" );
 const Step = require( "step" )
@@ -70,34 +70,39 @@ function fetchTile(req,res) {
   }
   let merc = new mercator({size:256})
   let arr = merc.bbox(req.params.x, req.params.y, req.params.zoom, false,"WGS84")
+  const sql = 'select wkb_geometry from "dataHeader";'
   // ready for query : knex or direct pg
   // point geojson to mapnik 
   // knexPg.makeEnvelope(arr[0],arr[1],arr[2],arr[3]).then(e=>{
   //   console.log(e)
     
   // })
-  knex.raw(`select json_build_object('type', 'FeatureCollection','features', json_agg(ST_AsGeoJSON( wkb_geometry)::json)) from "dataHeader"`).then(e=>{
-    // console.log(e.rows[0].json_build_object)
-    if(e){
-      mapnikify(e.rows[0].json_build_object, false, function(err,xml){
-        if(err) throw err;
-        let map = new mapnik.Map(512,512)
-        map.fromString(xml,{},function(err,map){
-          if(err) throw err;
-          map.zoomAll()
-          let im = new mapnik.Image(width,height)
-          map.render(im,function(err,buff){
-            if(err) throw err;
-            console.log(buff)
-          })
-        })
-      })
-    }
-  })
+
+
+  // knex.raw(`select json_build_object('type', 'FeatureCollection','features', json_agg(ST_AsGeoJSON( wkb_geometry)::json)) from "dataHeader"`).then(e=>{
+  //   // console.log(e.rows[0].json_build_object)
+  //   if(e){
+  //     mapnikify(e.rows[0].json_build_object, false, function(err,xml){
+  //       if(err) throw err;
+  //       let map = new mapnik.Map(512,512)
+  //       // map.fromString(xml,{},function(err,map){
+  //       //   if(err) throw err;
+  //       //   map.zoomAll()
+  //       //   let im = new mapnik.Image(width,height)
+  //       //   map.render(im,function(err,buff){
+  //       //     if(err) throw err;
+  //       //     console.log(buff)
+  //       //   })
+  //       // })
+  //     })
+  //   }
+  // })
   
 
   console.log( merc.bbox(req.params.x, req.params.y, req.params.zoom, false,"WGS84"))
 }
+
+
 
 
 

@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 # Based on
-# https://switch2osm.org/serving-tiles/manually-building-a-tile-server-18-04-lts/
+# https://switch2osm.org/serving-tiles/manually-building-a-tile-server-20-04-lts/
 
 # Set up environment
 ENV TZ=UTC
@@ -111,7 +111,7 @@ RUN mkdir /var/lib/mod_tile \
  && echo "LoadModule headers_module /usr/lib/apache2/modules/mod_headers.so" >> /etc/apache2/conf-available/mod_headers.conf \
  && a2enconf mod_tile && a2enconf mod_headers
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
-COPY leaflet-demo.html /var/www/html/index.html
+# COPY leaflet-demo.html /var/www/html/index.html
 RUN ln -sf /dev/stdout /var/log/apache2/access.log \
  && ln -sf /dev/stderr /var/log/apache2/error.log
 
