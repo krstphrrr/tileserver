@@ -53,11 +53,9 @@ API.server = ( ) => {
     let bbox = merc.bbox(x, y, zoom, false,"WGS84")
     map.add_layer(layer)
     map.extent = bbox
-    map.fromString(path.join(__dirname,'point_vector.xml'),{strict:true}, function(err,map){
+    map.load(path.join(__dirname,'point_vector.xml'),{strict:true}, function(err,map){
       if (err) throw err;
-      
-      
-      
+
       let im = new mapnik.Image(256,256)
       map.render(im, function(err,tile){
         if(err){
@@ -65,7 +63,8 @@ API.server = ( ) => {
         } else {
           tile.encode('png8',function(err,buffer){
             if(err) throw err;
-            res.send(buffer)
+            res.writeHead(200, {'Content-Type': 'image/png'});
+            res.end(buffer)
           })
         }
       })
