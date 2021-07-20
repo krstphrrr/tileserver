@@ -18,17 +18,8 @@ mapnik.register_default_input_plugins();
 const proj4 = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs';
 
 //
-const createVectorTile = ({ x, y, zoom }) => {
-
-}
-const API = { };
-
-API.server = ( ) => {
-  const app = express()
-  // building tiling routes here
-  app.get('/:style/:zoom/:x/:y.:format([a-z.]+)', async (req, res) => {
-
-    let {x,y,zoom} = req.params;
+const ldc_pull = (params) => {
+  let {x,y,zoom} = params;
     const dbConfig = {
       host: dbconfig.database.host,
       dbname: dbconfig.database.dbname,
@@ -37,7 +28,8 @@ API.server = ( ) => {
       type: 'postgis',
       table: '"dataHeader"',
       geometry_field: "wkb_geometry",
-      srid: 4326
+      srid: 4326,
+      persist_connection:false
     };
     zoom = parseInt(zoom, 10)
     x = parseInt(x, 10)
@@ -45,31 +37,44 @@ API.server = ( ) => {
   
     const map = new mapnik.Map(256, 256, proj4);
     let layer = new mapnik.Layer('tile', proj4);
-    // let bbox = mercator.xyz_to_envelope(parseInt(x), parseInt(y), parseInt(zoom), false);
+    
     layer.datasource = new mapnik.Datasource(
-      dbConfig
+      dbConfig 
     );
     layer.styles = ['point'];
     let bbox = merc.bbox(x, y, zoom, false,"WGS84")
     map.add_layer(layer)
     map.extent = bbox
-    map.load(path.join(__dirname,'point_vector.xml'),{strict:true}, function(err,map){
-      if (err) throw err;
+    return map
+}
+const API = { };
 
-      let im = new mapnik.Image(256,256)
-      map.render(im, function(err,tile){
-        if(err){
-          throw err
-        } else {
-          tile.encode('png8',function(err,buffer){
-            if(err) throw err;
-            res.writeHead(200, {'Content-Type': 'image/png'});
-            res.end(buffer)
-          })
-        }
-      })
+API.server = ( ) => {
+  const app = express()
+  // building tiling routes here
+  app.get('/:style/:zoom/:x/:y.:format([a-z.]+)', async (req, res) => {
     
-    })
+    let map = ldc_pull(req.params)
+    if(map){
+      map.load(path.join(__dirname,'point_vector.xml'),{strict:true}, function(err,map){
+        if (err) throw err;
+  
+        let im = new mapnik.Image(256,256)
+        map.render(im, function(err,tile){
+          if(err){
+            throw err
+          } else {
+            tile.encode('png8',function(err,buffer){
+              if(err) throw err;
+              res.writeHead(200, {'Content-Type': 'image/png'});
+              res.end(buffer)
+            })
+          }
+        })
+      
+      })
+    }
+
 
   })
 
