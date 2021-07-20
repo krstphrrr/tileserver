@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  tile:
+    build:
+      context: .
+      dockerfile: .
+    ports:
+      - 3000:3000
+    container_name: tile
+    volumes:
+      # - drupal_test4_dbdata:/var/lib/mysql
+      - ./app:/usr/src/app:cached
