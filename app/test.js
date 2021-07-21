@@ -17,8 +17,40 @@ mapnik.register_default_fonts();
 mapnik.register_default_input_plugins();
 const proj4 = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs';
 
-//
-const ldc_pull = (params) => {
+function stringmunch(queries){
+  let strArray = []
+
+  if(Object.keys(queries).length<=1){
+    let str = ""
+    for(const [key,value] of Object.entries(queries)){
+      str += `"${key}"='${value}'`
+      
+    }
+    return str
+  } else {
+    
+    for(const [key,value] of Object.entries(queries)){
+      let str = ""
+      str += `"${key}"='${value}'`
+      strArray.push(str)
+      
+    }
+    return strArray.join(" AND ")
+  }
+}
+const ldc_pull = (params , query=null) => {
+  
+  let sql
+  switch(query){
+    case null:
+      sql = '"dataHeader"'
+      break
+    default:
+      let magicString = stringmunch(query)
+      sql =`(SELECT * FROM "dataHeader" WHERE ${magicString}) as tile`
+
+  }
+  
   let {x,y,zoom} = params;
     const dbConfig = {
       host: dbconfig.database.host,
@@ -26,7 +58,7 @@ const ldc_pull = (params) => {
       user: dbconfig.database.user,
       password: dbconfig.database.password,
       type: 'postgis',
-      table: '"dataHeader"',
+      table: sql,
       geometry_field: "wkb_geometry",
       srid: 4326,
       persist_connection:false
@@ -51,10 +83,14 @@ const API = { };
 
 API.server = ( ) => {
   const app = express()
-  // building tiling routes here
+  let map
   app.get('/:style/:zoom/:x/:y.:format([a-z.]+)', async (req, res) => {
+    if(Object.keys(req.query).length>0){
+      map = ldc_pull(req.params, req.query)
+    } else {
+      map = ldc_pull(req.params)
+    }
     
-    let map = ldc_pull(req.params)
     if(map){
       map.load(path.join(__dirname,'point_vector.xml'),{strict:true}, function(err,map){
         if (err) throw err;
