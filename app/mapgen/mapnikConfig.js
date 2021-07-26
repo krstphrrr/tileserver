@@ -47,7 +47,7 @@ exports.ldcPull = (params , query=null) => {
     default:
       // let magicString = sqlHelper(query)
       let realQry = this.qryBuilder(query)
-      sql =`${realQry}`
+      sql =`(${realQry}) as tile`
   }
   
   let {x,y,zoom} = params;
@@ -87,7 +87,7 @@ exports.ldcPull = (params , query=null) => {
     );
     layer.styles = ['point'];
     let bbox = merc.bbox(x, y, zoom, false,"WGS84")
-    
+ 
     map.add_layer(layer)
     map.extent = bbox
     return map
