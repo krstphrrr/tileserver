@@ -1,6 +1,5 @@
 
-const API = require("./test")
-
+const API = require("./server")
 const PORT = Number( process.env.PORT || 3000 );
 
 const main = ( ) => {
