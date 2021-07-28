@@ -1,6 +1,7 @@
+# original dockerfile: https://github.com/jawg/docker-mapnik3/blob/master/v3.1/Dockerfile
 FROM jawg/mapnik3:latest
 
-EXPOSE 3000
+
 # get node
 RUN apt-get update && \
     apt-get install curl -y && \ 
@@ -9,12 +10,16 @@ RUN apt-get update && \
 
 # install dependencies 
 WORKDIR /usr/src
-RUN mkdir /usr/src/app
+
+
+# copying from local context into docker container directory
 COPY ./ /usr/src
+
 RUN npm install
 RUN npm i mapnik
-RUN npm i @mapbox/geojson-mapnikify
+
+# exposing port where the node app is listening
+EXPOSE 3000
 
 # run app
-
 CMD ["npm", "start"]
