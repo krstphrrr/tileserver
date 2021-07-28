@@ -15,10 +15,6 @@ RUN npm install
 RUN npm i mapnik
 RUN npm i @mapbox/geojson-mapnikify
 
-
-# get app directory 
-
-
 # run app
 
 CMD ["npm", "start"]
