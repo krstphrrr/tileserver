@@ -9,4 +9,5 @@ const pool = new Pool({
   database: config.database.dbname
 })
 
+
 module.exports = pool
