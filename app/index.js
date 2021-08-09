@@ -4,14 +4,17 @@ var path = require('path');
 const app = express()
 const mercator = require('@mapbox/sphericalmercator');
 const port = Number( process.env.PORT || 3000 );
-
+const cors = require('cors')
 const pool = require('./mapgen/pool')
 
+let corsOptions = {
+  origin:'http://localhost:4200'
+}
 
-app.get('/:style/:zoom/:x/:y.mvt', async(req, res) => {
+app.get('/:style/:zoom/:x/:y.:format([a-z.]+)',cors(), async(req, res) => {
   // 
-  switch(req.params.style){
-    case 'grid':
+  switch(req.params.format){
+    case 'png':
       // console.log(qryBuilder(req.query))
       // // if there are any additional query parameters, 
       // // include them in ldcPull arguments
@@ -45,7 +48,7 @@ app.get('/:style/:zoom/:x/:y.mvt', async(req, res) => {
       //   })
       // }
       break;
-    case 'points':
+    case 'pbf':
       //mapnik alternative
       let merc = new mercator({size:256})
       let {style, zoom,x,y,format} = req.params
