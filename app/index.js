@@ -1,23 +1,28 @@
 const express = require('express')
-// const {ldcPull, mapnikRet, qryBuilder} = require('./mapgen/mapnikConfig')
+const {ldcPull, mapnikRet, qryBuilder} = require('./mapgen/mapnikConfig')
 var path = require('path');
 const app = express()
 const mercator = require('@mapbox/sphericalmercator');
 const port = Number( process.env.PORT || 3000 );
 const cors = require('cors')
 const pool = require('./mapgen/pool')
-
+const redis = require('redis')
+const mapnik = require('mapnik')
+const client = redis.createClient(6379, "redis")
+const dbconfig = require('../config')
 let corsOptions = {
   origin:'http://localhost:4200'
+  
 }
 
 app.get('/:style/:zoom/:x/:y.:format([a-z.]+)',cors(), async(req, res) => {
-  // 
+  // let {style, zoom,x,y,format} = req.params
+  // res.send({style, zoom, x, y, format})
   switch(req.params.format){
     case 'png':
-      // console.log(qryBuilder(req.query))
-      // // if there are any additional query parameters, 
-      // // include them in ldcPull arguments
+      console.log(qryBuilder(req.query))
+      // if there are any additional query parameters, 
+      // include them in ldcPull arguments
       // if(Object.keys(req.query).length>0){
       //   // first route
       //   map = ldcPull(req.params, req.query)
@@ -26,32 +31,79 @@ app.get('/:style/:zoom/:x/:y.:format([a-z.]+)',cors(), async(req, res) => {
       //   // second route
       //   map = ldcPull(req.params)
       // }
+      // let map = ldcPull(req.params)
+      /////////////////////////////////
+      // let merc = new mercator({size:256})
+      mapnik.register_default_fonts();
+      mapnik.register_default_input_plugins();
+      let merc = new mercator({size:256})
+      sql = '"dataHeader"'
+      // const proj4 = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +no_defs +over"
+      let {x,y,zoom} = req.params;
+      const dbConfig = {
+        host: dbconfig.database.host,
+        dbname: dbconfig.database.dbname,
+        user: dbconfig.database.user,
+        password: dbconfig.database.password,
+        type: 'postgis',
+        table: sql,
+        geometry_field: "wkb_geometry",
+        srid: 4326,
+        // srid: 3857,
+      };
+      zoom = parseInt(zoom, 10)
+      x = parseInt(x, 10)
+      y = parseInt(y, 10)
+      const map = new mapnik.Map(256, 256);
+      const layer = new mapnik.Layer('tile');
       
-      // if(map){
-      //   // once mapnik layer is created, load styles
-      //   map.load(path.join(__dirname,'point_vector.xml'),{strict:true}, function(err,map){
-      //     if (err) throw err;
-      //     // handling the set up of a new mapnik image externally
-      //     let im = mapnikRet(256,256)
-      //     map.render(im, function(err,tile){
-      //       if(err){
-      //         throw err
-      //       } else {
-      //         tile.encode('png8',function(err,buffer){
-      //           if(err) throw err;
-      //           res.writeHead(200, {'Content-Type': 'image/png'});
-      //           res.end(buffer)
-      //         })
-      //       }
-      //     })
+      layer.datasource = new mapnik.Datasource(
+        dbConfig 
+      );
+      layer.styles = ['point'];
+      // map.layers[0].status = false
+      const bbox = merc.bbox(x, y, zoom, false,"WGS84", 256)
+      // console.log(tile2degree(x,y,zoom), bbox)
+      // let envelope = mapnik.envelope(bbox)
+      map.add_layer(layer)
+      map.add_layer(layer)
+      map.add_layer(layer)
+      // map.layers()[0]=false
+      console.log(map.layers())
+      map.extent = bbox
+
+
+
+
+
+
+      /////////////////////////////////
+      if(map){
+        // once mapnik layer is created, load styles
+        map.load(path.join(__dirname,'point_vector.xml'), function(err,map){
+          if (err) throw err;
+          // map.zoomTo(bbox)
+          let im = new mapnik.Image(256,256)
+          map.render(im, function(err,tile){
+            if(err){
+              throw err
+            } else {
+              tile.encode('png256',function(err,buffer){
+                console.log(buffer)
+                if(err) throw err;
+                res.writeHead(200, {'Content-Type': 'image/png'});
+                res.end(buffer)
+              })
+            }
+          })
         
-      //   })
-      // }
+        })
+      } 
       break;
     case 'pbf':
       //mapnik alternative
-      let merc = new mercator({size:256})
-      let {style, zoom,x,y,format} = req.params
+      // let merc = new mercator({size:256})
+      // let {style, zoom,x,y,format} = req.params
       let qry = pool.query(getTile(x,y,zoom))
       // res.send()
       qry.then(result => {

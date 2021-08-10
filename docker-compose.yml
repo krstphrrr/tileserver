@@ -10,3 +10,7 @@ services:
     volumes:
       # - drupal_test4_dbdata:/var/lib/mysql
       - ./app:/usr/src/app:cached
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
